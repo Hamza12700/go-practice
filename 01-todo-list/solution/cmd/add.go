@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -25,20 +26,53 @@ func addTodos(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatalln("failed to read file:", err)
 	}
-	if !strings.Contains(string(contents), "IsComplete") {
-		_, err = file.WriteString("Description,CreatedAt,IsComplete\n")
+
+	haveDate := true
+	if !strings.Contains(string(contents), "ID") {
+		haveDate = false
+		_, err = file.WriteString("ID,Description,CreatedAt,IsComplete\n")
 		if err != nil {
 			log.Fatalln("failed to write to file:", err)
 		}
 	}
+	writer := csv.NewWriter(file)
+	defer func() {
+		file.Close()
+		writer.Flush()
+	}()
 
-	defer file.Close()
+	id := 1
+	if haveDate {
+		csvFile, err := os.Open("data/todos.csv")
+		if err != nil {
+			log.Fatalln("failed to open file for reading:", err)
+		}
+		defer csvFile.Close()
+
+		fileReader := csv.NewReader(csvFile)
+		_, err = fileReader.Read()
+		if err != nil {
+			log.Fatalln("failed to read csv file:", err)
+		}
+
+		records, err := fileReader.ReadAll()
+		if err != nil {
+			log.Fatalln("failed to readAll csv file:", err)
+		}
+		for _, record := range records {
+			recordID, err := strconv.Atoi(record[0])
+			if err != nil {
+				log.Fatalln("failed to parse int")
+			}
+			if recordID >= id {
+				id += 1
+			}
+		}
+	}
+
 	for _, arg := range args {
-		writer := csv.NewWriter(file)
-		defer writer.Flush()
-
 		data := [][]string{
-			{arg, time.Now().Local().Format(time.RFC850), "false"},
+			{strconv.FormatInt(int64(id), 10), arg, time.Now().Local().Format(time.RFC850), "false"},
 		}
 
 		for _, record := range data {
@@ -46,6 +80,11 @@ func addTodos(cmd *cobra.Command, args []string) {
 				log.Fatalln("failed to write record", err)
 			}
 		}
+		id += 1
+	}
+	writer.Flush()
+	if err := writer.Error(); err != nil {
+		log.Fatalln("failed to flush writer", err)
 	}
 }
 
