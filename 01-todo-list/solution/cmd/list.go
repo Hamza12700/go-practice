@@ -44,9 +44,9 @@ func listTodos(cmd *cobra.Command, args []string) {
 
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"Description", "Created At", "Done"})
+	t.AppendHeader(table.Row{"ID", "Description", "Created At", "Done"})
 	for _, record := range records {
-		desc, createdAt, isComplete := record[0], record[1], record[2]
+		id, desc, createdAt, isComplete := record[0], record[1], record[2], record[3]
 		parseBool, err := strconv.ParseBool(isComplete)
 		if err != nil {
 			log.Fatalln("failed to parse bool:", err)
@@ -60,7 +60,7 @@ func listTodos(cmd *cobra.Command, args []string) {
 			log.Fatalln("failed to parse time:", err)
 		}
 		t.AppendRows([]table.Row{
-			{desc, timediff.TimeDiff(parseTime), isComplete},
+			{id, desc, timediff.TimeDiff(parseTime), isComplete},
 		})
 		t.SetStyle(table.StyleLight)
 	}
