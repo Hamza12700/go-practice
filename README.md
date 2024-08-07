@@ -8,12 +8,12 @@ Inside of this repository are 5 directories, each representing a single project 
 Each of the project ideas contain a README and any supplementary resources or advice to help you build 
 the project.
 
-## 01 - Todo List CLI
+## 01 - Todo List CLI (DONE)
 
 This project is to build a CLI todo list called `tasks`. There is my own built version you can try out
 on the releases page
 
-## 02 - Backend API
+## 02 - Backend API (DONE)
 
 This project is to build a backend API for a Calculator Service. There is a simple OpenAPI Specification on this
 project to help you define the endpoints your API should support.
